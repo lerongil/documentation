@@ -22,6 +22,10 @@
       "url": "/transpile/custom-transpiler-pass"
     },
     {
+      "title": "Transpiler plugins",
+      "url": "/transpile/transpiler-plugins"
+    },
+    {
       "title": "Use the transpile function",
       "children": [
         {
