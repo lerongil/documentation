@@ -34,7 +34,7 @@ jobs:
         with:
           files: docs/**/*.ipynb
           files_ignore: docs/api/**
-          delimiter: "\n"
+          separator: "\n"
 
       - name: Check for notebooks that require LaTeX
         id: latex-changed-files
