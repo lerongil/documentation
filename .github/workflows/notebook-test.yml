@@ -74,10 +74,10 @@ jobs:
           key: ${{ hashFiles('scripts/nb-tester/requirements.txt') }}
 
       - name: Run tox
-        run: tox -- ${{ join(fromJson(steps.all-changed-files.outputs.all_changed_files), " ") }} --write
+        run: "tox -- ${{ join(fromJson(steps.all-changed-files.outputs.all_changed_files), ' ') }} --write"
 
       - name: Upload executed notebooks
         uses: actions/upload-artifact@v4
         with:
           name: Executed notebooks
-          path: ${{ join(fromJson(steps.all-changed-files.outputs.all_changed_files), "\n") }}
+          path: "${{ join(fromJson(steps.all-changed-files.outputs.all_changed_files), '\n') }}"
