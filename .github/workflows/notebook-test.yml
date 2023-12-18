@@ -33,7 +33,7 @@ jobs:
         uses: tj-actions/changed-files@af2816c65436325c50621100d67f6e853cd1b0f1
         with:
           files: docs/**/*.ipynb
-          files-ignore: docs/api/**
+          files_ignore: docs/api/**
 
       - name: Check for notebooks that require LaTeX
         id: latex-changed-files
