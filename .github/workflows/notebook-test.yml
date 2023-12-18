@@ -34,7 +34,7 @@ jobs:
         with:
           files: docs/**/*.ipynb
           files_ignore: docs/api/**
-          separator: "\n"
+          json: true
 
       - name: Check for notebooks that require LaTeX
         id: latex-changed-files
@@ -74,11 +74,10 @@ jobs:
           key: ${{ hashFiles('scripts/nb-tester/requirements.txt') }}
 
       - name: Run tox
-        run: tox -- "${{ steps.all-changed-files.outputs.all_changed_files }}" --write
+        run: tox -- ${{ join(fromJson(steps.all-changed-files.outputs.all_changed_files), " ") }} --write
 
       - name: Upload executed notebooks
         uses: actions/upload-artifact@v4
         with:
           name: Executed notebooks
-          path: |
-            ${{ steps.all-changed-files.outputs.all_changed_files }}
+          path: ${{ join(fromJson(steps.all-changed-files.outputs.all_changed_files), "\n") }}
