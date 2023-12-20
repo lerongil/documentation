@@ -19,7 +19,7 @@
       "url": "/transpile/dynamical-decoupling-pass-manager"
     },
     {
-      "title": "Write a custom transpiler pass",
+      "title": "Write your own transpiler pass",
       "url": "/transpile/custom-transpiler-pass"
     },
     {
@@ -34,7 +34,7 @@
           "url": "/transpile/set-optimization"
         },
         {
-          "title": "Represent quantum computers",
+          "title": "Representing quantum computers",
           "url": "/transpile/representing_quantum_computers"
         },
         {

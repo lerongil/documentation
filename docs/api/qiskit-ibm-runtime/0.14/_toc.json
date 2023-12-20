@@ -6,7 +6,7 @@
       "children": [
         {
           "title": "Overview",
-          "url": "/api/qiskit-ibm-runtime/0.14/"
+          "url": "/api/qiskit-ibm-runtime/0.14/index"
         },
         {
           "title": "Estimator",
@@ -89,7 +89,7 @@
     },
     {
       "title": "Release notes",
-      "url": "/api/qiskit-ibm-runtime/release-notes"
+      "url": "/api/qiskit-ibm-runtime/0.14/release-notes"
     }
   ]
 }

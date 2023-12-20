@@ -56,6 +56,8 @@ Initialize a backend class
 
 In addition to the public abstract methods, subclasses should also implement the following private methods:
 
+<span id="undefined" />
+
 `abstract classmethod _default_options()`
 
 Return the default options

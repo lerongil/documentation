@@ -357,6 +357,8 @@ const pkg = {
   // These properties are not used but included to appease typescript
   githubSlug: "qiskit/qiskit-ibm-runtime",
   baseUrl: `https://qiskit.org/ecosystem/ibm-runtime`,
-  initialUrl: `https://qiskit.org/ecosystem/ibm-runtime/apidocs/ibm-runtime.html`,
+  initialUrls: [
+    `https://qiskit.org/ecosystem/ibm-runtime/apidocs/ibm-runtime.html`,
+  ],
   transformLink: undefined,
 };

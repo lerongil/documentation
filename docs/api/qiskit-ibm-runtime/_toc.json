@@ -6,7 +6,7 @@
       "children": [
         {
           "title": "Overview",
-          "url": "/api/qiskit-ibm-runtime"
+          "url": "/api/qiskit-ibm-runtime/index"
         },
         {
           "title": "Estimator",
@@ -15,6 +15,10 @@
         {
           "title": "IBMBackend",
           "url": "/api/qiskit-ibm-runtime/qiskit_ibm_runtime.IBMBackend"
+        },
+        {
+          "title": "ParameterNamespace",
+          "url": "/api/qiskit-ibm-runtime/qiskit_ibm_runtime.ParameterNamespace"
         },
         {
           "title": "QiskitRuntimeService",
@@ -35,6 +39,10 @@
         {
           "title": "RuntimeOptions",
           "url": "/api/qiskit-ibm-runtime/qiskit_ibm_runtime.RuntimeOptions"
+        },
+        {
+          "title": "RuntimeProgram",
+          "url": "/api/qiskit-ibm-runtime/qiskit_ibm_runtime.RuntimeProgram"
         },
         {
           "title": "Sampler",

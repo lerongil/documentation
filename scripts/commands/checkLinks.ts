@@ -25,29 +25,9 @@ import remarkGfm from "remark-gfm";
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 
-const DOCS_GLOBS_TO_CHECK = [
-  "docs/**/*.{ipynb,md,mdx}",
-  // Ignore historical versions
-  "!docs/api/{qiskit,qiskit-ibm-provider,qiskit-ibm-runtime}/[0-9]*/*",
-  "!docs/api/qiskit/release-notes/*",
-];
-
-// These docs/ globs are only loaded so that we can
-// validate that internal links to the files are valid.
-// We don't check that their own links are valid.
-const DOCS_GLOBS_TO_LOAD = [
-  "docs/api/qiskit/0.44/{algorithms,opflow}.md",
-  "docs/api/qiskit/0.44/qiskit.{algorithms,extensions,opflow}.*",
-  "docs/api/qiskit/0.44/qiskit.utils.QuantumInstance.md",
-  "docs/api/qiskit/release-notes/index.md",
-];
-
 // The links in the files are not searched to see if they are valid.
-// The files need a list of links to be ignored.
-//
-// If all links in the file should be ignored, then modify GLOBS_TO_CHECK, such
-// as adding '!docs/my_file.md` to the list. If other files link to the file,
-// then you may need to add it to GLOBS_TO_LOAD.
+// The files need a list of links to be ignored, and when an asterisk
+// (*) is used as a link, all the links in the file will be ignored.
 const FILES_TO_IGNORES: { [id: string]: string[] } = {
   "docs/api/qiskit-ibm-provider/ibm-provider.md": ["ibm_provider"],
   "docs/api/qiskit-ibm-runtime/ibm-runtime.md": ["runtime_service"],
@@ -98,10 +78,10 @@ const FILES_TO_IGNORES: { [id: string]: string[] } = {
     "#qiskit.utils.optionals.HAS_PYDOT",
   ],
   "docs/api/qiskit-ibm-provider/qiskit_ibm_provider.IBMProvider.md": [
-    "https://auth.quantum.ibm.com/api",
+    "https://auth.quantum-computing.ibm.com/api",
   ],
   "docs/api/qiskit-ibm-runtime/qiskit_ibm_runtime.QiskitRuntimeService.md": [
-    "https://auth.quantum.ibm.com/api",
+    "https://auth.quantum-computing.ibm.com/api",
   ],
   "docs/api/qiskit/algorithms.md": ["https://www.qiskit.org/terra"],
   "docs/api/qiskit/qiskit.algorithms.Grover.md": [
@@ -115,11 +95,15 @@ const FILES_TO_IGNORES: { [id: string]: string[] } = {
   ],
 };
 
+// The files in the folders are not searched to see if their links
+// are valid.
+const FOLDERS_TO_IGNORES: string[] = ["docs/api/qiskit/release-notes/*"];
+
 // While these files don't exist in this repository, the link
 // checker should assume that they exist in production.
 const SYNTHETIC_FILES: string[] = [
   "docs/errors.mdx",
-  "docs/api/runtime/index.mdx",
+  "docs/api/runtime/tags/programs.mdx",
 ];
 
 interface Arguments {
@@ -132,6 +116,7 @@ const readArgs = (): Arguments => {
     .version(false)
     .option("external", {
       type: "boolean",
+      demandOption: false,
       default: false,
       description:
         "Should external links be checked? This slows down the script, but is useful to check.",
@@ -149,60 +134,57 @@ function markdownFromNotebook(source: string): string {
   return markdown;
 }
 
-async function getMarkdownAndAnchors(
-  filePath: string,
-): Promise<[string, string[]]> {
-  const source = await readFile(filePath, { encoding: "utf8" });
-  const markdown =
-    path.extname(filePath) === ".ipynb" ? markdownFromNotebook(source) : source;
-
-  const anchors = markdownLinkExtractor(markdown).anchors;
-
-  // Get the anchors from HTML ids.
-  const id_anchors = markdown.match(/(?<=id=")(.*)(?=")/gm);
-  if (id_anchors != null) {
-    id_anchors.forEach((id) => anchors.push("#" + id));
-  }
-  return [markdown, anchors];
-}
-
 /**
- * Process the markdown and Jupyter notebook files.
- *
- * filePathsToLoad is for files that we only need to load
- * so that we can determine if links from other files to that
- * file are valid. We need to determine all of its anchors.
- *
- * filePathsToCheck is for files that we will actually end up
- * checking. We determine its internal and external links. Other
- * files might link to these files, too, so we also determine
- * the valid anchors to make sure those links are correct.
- *
- * Returns a triplet:
- *   1. A list of `File` objects with their anchors. These represent
- *      the universe of valid internal links, other than any additional
- *      we may add in main() for e.g. images.
- *   2. A list of Link objects with internal links we will validate.
- *   3. A list of Link objects with external links we will validate.
+ * Return a list of File objects with all the files
+ * in `filePaths` and two lists of Link objects with all
+ * the internal and external links found in those files.
  */
-async function processDocsFiles(
-  filePathsToLoad: string[],
-  filePathsToCheck: string[],
+async function loadFilesAndLinks(
+  filePaths: string[],
 ): Promise<[File[], Link[], Link[]]> {
   const fileList: File[] = [];
-  for (let filePath of filePathsToLoad) {
-    const [_, anchors] = await getMarkdownAndAnchors(filePath);
-    fileList.push(new File(filePath, anchors, false));
-  }
-
   const internalLinkList: Link[] = [];
   const externalLinkList: Link[] = [];
-  // This is a map to avoid link duplications.
+
+  // Auxiliary Map to avoid link duplications
   const linkMap = new Map<string, string[]>();
 
-  for (let filePath of filePathsToCheck) {
-    const [markdown, anchors] = await getMarkdownAndAnchors(filePath);
+  // Files inside the folders we want to ignore
+  const filesInFoldersToIgnores = await globby(FOLDERS_TO_IGNORES);
+
+  for (let filePath of filePaths) {
+    const source = await readFile(filePath, { encoding: "utf8" });
+    const markdown =
+      path.extname(filePath) === ".ipynb"
+        ? markdownFromNotebook(source)
+        : source;
+    const anchors = markdownLinkExtractor(markdown).anchors;
+
+    // Get the anchors from HTML ids.
+    const id_anchors = markdown.match(/(?<=id=")(.*)(?=")/gm);
+    if (id_anchors != null) {
+      id_anchors.forEach((id) => anchors.push("#" + id));
+    }
+
     fileList.push(new File(filePath, anchors, false));
+
+    // Files to ignore
+    if (
+      filePath in FILES_TO_IGNORES &&
+      FILES_TO_IGNORES[filePath].includes("*")
+    ) {
+      continue;
+    }
+
+    if (filesInFoldersToIgnores.includes(filePath)) {
+      continue;
+    }
+
+    // Ignore all historical API version files.
+    if (/.*\/[0-9].*\//.test(filePath)) {
+      continue;
+    }
+
     unified()
       .use(rehypeParse)
       .use(remarkGfm)
@@ -264,13 +246,13 @@ async function processDocsFiles(
 async function main() {
   const args = readArgs();
 
-  const docsToLoad = await globby(DOCS_GLOBS_TO_LOAD);
-  const docsToCheck = await globby(DOCS_GLOBS_TO_CHECK);
+  // Determine what files with links we want to parse
+  const pathsWithLinks = await globby("docs/**/*.{ipynb,md,mdx}");
 
   // Parse the files with links and get a list with all the links
   // in all the files without duplications.
   const [docsFiles, internalLinkList, externalLinkList] =
-    await processDocsFiles(docsToLoad, docsToCheck);
+    await loadFilesAndLinks(pathsWithLinks);
 
   // Define extra files that we don't want to parse
   const otherFiles = [

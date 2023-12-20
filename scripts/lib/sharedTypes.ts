@@ -25,7 +25,8 @@ export interface Link {
 export type PkgInfo = {
   name: string;
   githubSlug: string;
-  initialUrl: string;
+  baseUrl: string;
+  initialUrls: string[];
   title: string;
   ignore?(id: string): boolean;
   hasSeparateReleaseNotes?: boolean;
@@ -47,5 +48,4 @@ export type Pkg = PkgInfo & {
   versionWithoutPatch: string;
   historical: boolean;
   releaseNoteEntries: { title: string; url: string }[];
-  baseUrl: string;
 };

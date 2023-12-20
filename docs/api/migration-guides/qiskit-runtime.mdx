@@ -145,7 +145,8 @@ This guide describes how to migrate code from the legacy IBMQ provider
 `qiskit-ibmq-provider` package to use Qiskit Runtime
 `qiskit-ibm-runtime`. This guide includes instructions to
 migrate legacy runtime programs to the new syntax. However, the ability
-to use custom uploaded programs has been deprecated and has been replaced with Quantum Serverless patterns.  For instructions to migrate, see [Converting from Qiskit Runtime Programs.](https://qiskit-extensions.github.io/quantum-serverless/migration/migration_from_qiskit_runtime_programs.html)
+to use custom uploaded programs is pending deprecation, so these should
+be migrated to use primitives instead.
 
 ### Changes in Class name and location
 
@@ -293,7 +294,79 @@ backend = service.backend("ibm_backend", instance="h1/g1/p1")
 
 ### Upload, view, or delete custom prototype programs
 
-This function has been replaced with Quantum Serverless patterns.  For instructions to migrate, see [Converting from Qiskit Runtime Programs.](https://qiskit-extensions.github.io/quantum-serverless/migration/migration_from_qiskit_runtime_programs.html)
+To work with custom programs, replace `provider.runtime` with `service`.
+
+<Admonition type="note">
+    This function is pending deprecation.
+</Admonition>
+
+**Legacy**
+
+``` python
+# Printing existing programs
+provider.runtime.pprint_programs()
+
+# Deleting custom program
+provider.runtime.delete_program("my_program") # Substitute "my_program" with your program ID
+
+# Uploading custom program
+program_id = provider.runtime.upload_program(
+            data=program_data,
+            metadata=program_json
+            )
+```
+
+**Updated**
+
+``` python
+# Printing existing programs
+service.pprint_programs()
+
+# Deleting custom program
+service.delete_program("my_program") # Substitute "my_program" with your program ID
+
+# Uploading custom program
+program_id = service.upload_program(
+            data=program_data,
+            metadata=program_json
+            )
+```
+
+### Run prototype programs
+
+To run prototype programs, replace `provider.runtime` with `service`.
+
+<Admonition type="note">
+    This function is pending deprecation.
+</Admonition>
+
+**Legacy**
+
+``` python
+program_inputs = {"iterations": 3}
+options = {"backend_name": backend.name()}
+job = provider.runtime.run(program_id="hello-world",
+                           options=options,
+                           inputs=program_inputs
+                          )
+print(f"job id: {job.job_id()}")
+result = job.result()
+print(result)
+```
+
+**Updated**
+
+``` python
+program_inputs = {"iterations": 3}
+options = {"backend": ""}
+job = service.run(program_id="hello-world",
+                  options=options,
+                  inputs=program_inputs
+                  )
+print(f"job id: {job.job_id()}")
+result = job.result()
+print(result)
+```
 
 <span id="parm-circ"></span>
 ## Parametrized circuits with primitives
@@ -397,6 +470,6 @@ an algorithm, you might want to tune certain primitive options. For details, see
     - [Get started with Sampler.](../../run/primitives-get-started#start-sampler)
     - Explore [sessions.](../../run/sessions)
     - [Run a primitive in a session.](../../run/run-jobs-in-session)
-    - Experiment with the [Submit pre-transpiled circuits tutorial.](https://learning.quantum.ibm.com/tutorial/submitting-user-transpiled-circuits-using-primitives)
+    - Experiment with the [Run custom transpiled circuits with primitives tutorial.](https://learning.quantum-computing.ibm.com/tutorial/submitting-user-transpiled-circuits-using-primitives)
 
 </Admonition>

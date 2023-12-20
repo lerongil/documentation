@@ -32,7 +32,9 @@ export function generateToc(
   pkg: Pkg,
   results: Array<{ meta: PythonObjectMeta; url: string }>,
 ) {
-  const releaseNotesUrl = `/api/${pkg.name}/release-notes`;
+  const releaseNotesUrl = pkg.historical
+    ? `/api/${pkg.name}/${pkg.versionWithoutPatch}/release-notes`
+    : `/api/${pkg.name}/release-notes`;
   const nestModule = pkg.tocOptions?.nestModule ?? (() => true);
   const resultsWithName = results.filter(
     (result) => !isEmpty(result.meta.python_api_name),
@@ -54,8 +56,7 @@ export function generateToc(
     const tocModules = modules.map(
       (module): TocEntry => ({
         title: module.meta.python_api_name!,
-        // Remove the final /index from the url
-        url: module.url.replace(/\/index$/, ""),
+        url: module.url,
       }),
     );
     const tocModulesByTitle = keyBy(tocModules, (toc) => toc.title);
