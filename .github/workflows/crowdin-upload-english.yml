@@ -22,6 +22,11 @@ name: Upload English to Crowdin
 on:
   push:
     branches: [main]
+    paths:
+      - "docs/**/*"
+      - "!docs/api/qiskit/**/*"
+      - "!docs/api/qiskit-ibm-runtime/**/*"
+      - "!docs/api/qiskit-ibm-provider/**/*"
   workflow_dispatch:
 
 jobs:
